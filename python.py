@@ -60,22 +60,4 @@ for i in range(0,non_veg_items_count):
         veg_item = raw_input("Enter name of " + order[i] + " item:")
     non_veg_items.append(non_veg_item)
 
-    
-import pandas as pd
-import pickle
-
-data = pd.read_csv("/Users/kiranreddy/Desktop/xnd.csv",header=0,sep='\t')
-data = data.rename(columns={' NAV_DATE':'NAV_DATE'})
-
-data = data[['FUND_ID','EVENT_TS','NAV_DATE']]
-data.NAV_DATE = pd.to_datetime(data.NAV_DATE)
-
-data = data.loc[data.NAV_DATE == '2017-05-15']
-
-for i in range(0,37):
-    pricing = [{k:data.values[i][v] for v,k in enumerate(data.columns)} for i in range(len(data))]
-    empty_json = [i for i in range(len(pricing))]
-    empty_dict = {}
-    for i in range(len(pricing)):
-        empty_dict['header'] = pricing[i]
-        empty_json[i] = empty_dict
+  
