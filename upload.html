@@ -173,6 +173,17 @@ Prompt {{ i }}{% if not loop.last %}&#10;{% endif %}
                     $('#segment_name_field').hide();
                     $('#additional_fields').hide();
                 }
+                // Function to highlight the first line in the textarea
+            function selectFirstLine() {
+                const textarea = document.getElementById('questions');
+                textarea.setSelectionRange(0, textarea.value.indexOf('\n'));
+            }
+
+            // Automatically focus on the textarea and select the first line when the segment is chosen
+            $('#questions').focus(selectFirstLine);
+
+            // Select text on focus for future clicks
+            $('#questions').on('click', selectFirstLine);
             });
 
             // Check both fields before showing additional fields
