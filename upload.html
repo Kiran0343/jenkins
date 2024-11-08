@@ -28,7 +28,7 @@
             font-weight: bold;
             display: block;
         }
-        select {
+        select, input[type="text"] {
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
@@ -48,6 +48,9 @@
         button:hover {
             background-color: #357ABD;
         }
+        .manual-entry {
+            display: none; /* Initially hidden */
+        }
     </style>
 </head>
 <body>
@@ -66,30 +69,84 @@
             <option value="">Select Segment</option>
         </select>
 
+        <div class="manual-entry">
+            <h2>Manual Entry Prompts</h2>
+            {% for i in range(1, 11) %}
+                <label for="prompt{{ i }}">Prompt {{ i }}:</label>
+                <input type="text" id="prompt{{ i }}" name="prompt{{ i }}" placeholder="Enter value for prompt {{ i }}" disabled>
+            {% endfor %}
+        </div>
+
         <button type="submit">Submit</button>
     </form>
 
     <script>
-        document.getElementById('client_id').addEventListener('change', function() {
-            const clientId = this.value;
+        document.addEventListener('DOMContentLoaded', function() {
+            const clientIdSelect = document.getElementById('client_id');
             const segmentSelect = document.getElementById('segment_name');
+            const manualEntryDiv = document.querySelector('.manual-entry');
 
-            // Clear previous segments
-            segmentSelect.innerHTML = '<option value="">Select Segment</option>';
-            segmentSelect.disabled = true;
+            clientIdSelect.addEventListener('change', function() {
+                const clientId = this.value;
 
-            if (clientId) {
-                fetch(`/get_segments/${clientId}`)
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach(segment => {
-                        const option = document.createElement('option');
-                        option.value = segment;
-                        option.textContent = segment;
-                        segmentSelect.appendChild(option);
+                // Clear previous segments
+                segmentSelect.innerHTML = '<option value="">Select Segment</option>';
+                segmentSelect.disabled = true;
+
+                // Reset manual entry fields
+                resetManualEntryFields();
+
+                if (clientId) {
+                    fetch(`/get_segments/${clientId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        data.forEach(segment => {
+                            const option = document.createElement('option');
+                            option.value = segment;
+                            option.textContent = segment;
+                            segmentSelect.appendChild(option);
+                        });
+                        segmentSelect.disabled = false; // Enable the segment dropdown
+                    })
+                    .catch(error => {
+                        console.error('Error fetching segments:', error);
                     });
-                    segmentSelect.disabled = false; // Enable the segment dropdown
-                });
+                }
+            });
+
+            segmentSelect.addEventListener('change', function() {
+                // Show manual entry fields only if both fields are selected
+                if (clientIdSelect.value && this.value) {
+                    manualEntryDiv.style.display = 'block'; // Show manual entry fields
+                    enableManualEntryFields(); // Enable manual entry inputs
+                } else {
+                    manualEntryDiv.style.display = 'none'; // Hide manual entry fields if any selection is missing
+                    resetManualEntryFields(); // Reset manual entry fields
+                }
+            });
+
+            function resetManualEntryFields() {
+                for (let i = 1; i <= 10; i++) {
+                    const input = document.getElementById(`prompt${i}`);
+                    if (input) {
+                        input.value = ''; // Clear the input
+                        input.disabled = true; // Disable the input
+                    }
+                }
+            }
+
+            function enableManualEntryFields() {
+                for (let i = 1; i <= 10; i++) {
+                    const input = document.getElementById(`prompt${i}`);
+                    if (input) {
+                        input.disabled = false; // Enable the input
+                    }
+                }
             }
         });
     </script>
