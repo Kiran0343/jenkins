@@ -98,24 +98,24 @@
 
                 if (clientId) {
                     fetch(`/get_segments/${clientId}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        data.forEach(segment => {
-                            const option = document.createElement('option');
-                            option.value = segment;
-                            option.textContent = segment;
-                            segmentSelect.appendChild(option);
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            data.forEach(segment => {
+                                const option = document.createElement('option');
+                                option.value = segment;
+                                option.textContent = segment;
+                                segmentSelect.appendChild(option);
+                            });
+                            segmentSelect.disabled = false; // Enable the segment dropdown
+                        })
+                        .catch(error => {
+                            console.error('Error fetching segments:', error);
                         });
-                        segmentSelect.disabled = false; // Enable the segment dropdown
-                    })
-                    .catch(error => {
-                        console.error('Error fetching segments:', error);
-                    });
                 }
             });
 
