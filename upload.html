@@ -6,8 +6,8 @@
     <title>Flask App</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-        /* Hide the 3rd and 4th fields by default */
-        #additional_fields {
+        /* Hide the Segment Name and additional fields by default */
+        #segment_name_field, #additional_fields {
             display: none;
         }
     </style>
@@ -24,23 +24,25 @@
         {% endfor %}
     </select>
     
-    <!-- Segment Name dropdown (populated dynamically based on Client ID) -->
-    <label for="segment_name">Segment Name:</label>
-    <select id="segment_name" name="segment_name">
-        <option value="">Select Segment</option>
-    </select>
+    <!-- Segment Name dropdown (Initially Hidden) -->
+    <div id="segment_name_field">
+        <label for="segment_name">Segment Name:</label>
+        <select id="segment_name" name="segment_name">
+            <option value="">Select Segment</option>
+        </select>
+    </div>
     
     <!-- Additional Fields (Initially Hidden) -->
     <div id="additional_fields">
-        <h3>Select a Question:</h3>
-        <!-- Dropdown with 10 questions -->
+        <h3>Questions:</h3>
+        
+        <!-- Text area with 10 lines, each containing a prompt -->
         <label for="questions">Questions:</label>
-        <select id="questions" name="questions">
-            <option value="">Select a Question</option>
-            {% for i in range(1, 11) %}
-                <option value="Prompt {{ i }}">Prompt {{ i }}</option>
-            {% endfor %}
-        </select><br><br>
+        <textarea id="questions" name="questions" rows="10" readonly>
+{% for i in range(1, 11) %}
+Prompt {{ i }}
+{% endfor %}
+        </textarea><br><br>
         
         <!-- Fourth input field -->
         <label for="additional_input">Additional Input:</label>
@@ -49,7 +51,7 @@
     
     <script>
         $(document).ready(function() {
-            // Function to check if both fields are filled
+            // Function to check if both Client ID and Segment Name fields are filled
             function checkFields() {
                 const clientIdFilled = $('#client_id').val() !== "";
                 const segmentNameFilled = $('#segment_name').val() !== "";
@@ -61,11 +63,15 @@
                 }
             }
 
-            // Populate Segment Name dropdown based on Client ID selection
+            // Show Segment Name dropdown and populate it based on Client ID selection
             $('#client_id').change(function() {
                 const clientId = $(this).val();
                 
                 if (clientId) {
+                    // Show Segment Name field
+                    $('#segment_name_field').show();
+                    
+                    // Populate Segment Name dropdown
                     $.post('/get_segments', {client_id: clientId}, function(data) {
                         const segmentSelect = $('#segment_name');
                         segmentSelect.empty().append('<option value="">Select Segment</option>');
@@ -74,6 +80,9 @@
                         });
                     });
                 } else {
+                    // Hide Segment Name field if no Client ID is selected
+                    $('#segment_name_field').hide();
+                    $('#additional_fields').hide();
                     $('#segment_name').empty().append('<option value="">Select Segment</option>');
                 }
                 checkFields();  // Check fields after changing Client ID
