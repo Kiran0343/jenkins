@@ -3,54 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload File to Azure</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Dynamic Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #4A90E2;
+        }
+        form {
+            max-width: 400px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            display: block;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4A90E2;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #357ABD;
+        }
+    </style>
 </head>
 <body>
-    <h1>Upload File to Azure Blob Storage</h1>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" required>
-        <div id="folders-container">
-            <div class="folder-selection">
-                <select class="folder" name="folder[]" required>
-                    <option value="">Select Folder</option>
-                    {% for folder in folders %}
-                        <option value="{{ folder }}">{{ folder }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-        <button type="button" id="add-subfolder">Add Subfolder</button>
-        <button type="submit">Upload</button>
+    <h1>Select Client and Segment</h1>
+    <form action="/submit" method="POST">
+        <label for="client_id">Client ID:</label>
+        <select id="client_id" name="client_id" required>
+            <option value="">Select Client ID</option>
+            {% for segment in client_segments %}
+                <option value="{{ segment.client_id }}">{{ segment.client_id }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="segment_name">Segment Name:</label>
+        <select id="segment_name" name="segment_name" required disabled>
+            <option value="">Select Segment</option>
+        </select>
+
+        <button type="submit">Submit</button>
     </form>
 
     <script>
-        $(document).ready(function() {
-            $('#add-subfolder').click(function() {
-                const newFolderSelect = `
-                    <div class="folder-selection">
-                        <select class="folder" name="folder[]">
-                            <option value="">Select Folder</option>
-                        </select>
-                    </div>`;
-                $('#folders-container').append(newFolderSelect);
-            });
+        document.getElementById('client_id').addEventListener('change', function() {
+            const clientId = this.value;
+            const segmentSelect = document.getElementById('segment_name');
 
-            $(document).on('change', '.folder', function() {
-                const selectedFolder = $(this).val();
-                const $subfolderSelect = $(this).closest('.folder-selection').nextAll('.folder').first();
+            // Clear previous segments
+            segmentSelect.innerHTML = '<option value="">Select Segment</option>';
+            segmentSelect.disabled = true;
 
-                // Clear the subfolder dropdown
-                $subfolderSelect.empty().append('<option value="">Select Subfolder</option>');
-
-                if (selectedFolder) {
-                    $.getJSON(`/subfolders/${selectedFolder}`, function(data) {
-                        data.forEach(function(subfolder) {
-                            $subfolderSelect.append(`<option value="${subfolder}">${subfolder}</option>`);
-                        });
+            if (clientId) {
+                fetch(`/get_segments/${clientId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(segment => {
+                        const option = document.createElement('option');
+                        option.value = segment;
+                        option.textContent = segment;
+                        segmentSelect.appendChild(option);
                     });
-                }
-            });
+                    segmentSelect.disabled = false; // Enable the segment dropdown
+                });
+            }
         });
     </script>
 </body>
