@@ -3,9 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask App</title>
+    <title>Data Entry Form</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
+        /* General reset */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Page styling */
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f4f7fa;
+            padding: 20px;
+        }
+
+        /* Container styling */
+        .form-container {
+            max-width: 500px;
+            width: 100%;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+
+        /* Label styling */
+        label {
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        /* Select, Textarea, Input styling */
+        select, textarea, input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        /* Textarea styling */
+        textarea {
+            resize: none;
+        }
+
+        /* Responsive Styling for Small Screens */
+        @media (max-width: 500px) {
+            h1 {
+                font-size: 1.2rem;
+            }
+
+            label, select, textarea, input[type="text"] {
+                font-size: 0.9rem;
+            }
+        }
+
         /* Hide the Segment Name and additional fields by default */
         #segment_name_field, #additional_fields {
             display: none;
@@ -13,40 +82,42 @@
     </style>
 </head>
 <body>
-    <h1>Data Entry Form</h1>
-    
-    <!-- Client ID dropdown -->
-    <label for="client_id">Client ID:</label>
-    <select id="client_id" name="client_id">
-        <option value="">Select Client ID</option>
-        {% for client in clients %}
-            <option value="{{ client }}">{{ client }}</option>
-        {% endfor %}
-    </select>
-    
-    <!-- Segment Name dropdown (Initially Hidden) -->
-    <div id="segment_name_field">
-        <label for="segment_name">Segment Name:</label>
-        <select id="segment_name" name="segment_name">
-            <option value="">Select Segment</option>
-        </select>
-    </div>
-    
-    <!-- Additional Fields (Initially Hidden) -->
-    <div id="additional_fields">
-        <h3>Questions:</h3>
+    <div class="form-container">
+        <h1>Data Entry Form</h1>
         
-        <!-- Text area with 10 lines, each containing a prompt -->
-        <label for="questions">Questions:</label>
-        <textarea id="questions" name="questions" rows="10" readonly>
+        <!-- Client ID dropdown -->
+        <label for="client_id">Client ID:</label>
+        <select id="client_id" name="client_id">
+            <option value="">Select Client ID</option>
+            {% for client in clients %}
+                <option value="{{ client }}">{{ client }}</option>
+            {% endfor %}
+        </select>
+        
+        <!-- Segment Name dropdown (Initially Hidden) -->
+        <div id="segment_name_field">
+            <label for="segment_name">Segment Name:</label>
+            <select id="segment_name" name="segment_name">
+                <option value="">Select Segment</option>
+            </select>
+        </div>
+        
+        <!-- Additional Fields (Initially Hidden) -->
+        <div id="additional_fields">
+            <h3>Questions:</h3>
+            
+            <!-- Text area with 10 lines, each containing a prompt -->
+            <label for="questions">Questions:</label>
+            <textarea id="questions" name="questions" rows="10" readonly>
 {% for i in range(1, 11) %}
 Prompt {{ i }}
 {% endfor %}
-        </textarea><br><br>
-        
-        <!-- Fourth input field -->
-        <label for="additional_input">Additional Input:</label>
-        <input type="text" id="additional_input" name="additional_input">
+            </textarea><br><br>
+            
+            <!-- Fourth input field -->
+            <label for="additional_input">Additional Input:</label>
+            <input type="text" id="additional_input" name="additional_input">
+        </div>
     </div>
     
     <script>
