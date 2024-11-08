@@ -3,151 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Form</title>
+    <title>Flask App</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-        h1 {
-            text-align: center;
-            color: #4A90E2;
-        }
-        form {
-            max-width: 400px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        label {
-            margin-bottom: 5px;
-            font-weight: bold;
-            display: block;
-        }
-        select, input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #4A90E2;
-            color: white;
-            padding: 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #357ABD;
-        }
-        .manual-entry {
-            display: none; /* Initially hidden */
+        /* Hide the 3rd and 4th fields by default */
+        #additional_fields {
+            display: none;
         }
     </style>
 </head>
 <body>
-    <h1>Select Client and Segment</h1>
-    <form action="/submit" method="POST">
-        <label for="client_id">Client ID:</label>
-        <select id="client_id" name="client_id" required>
-            <option value="">Select Client ID</option>
-            {% for segment in client_segments %}
-                <option value="{{ segment.client_id }}">{{ segment.client_id }}</option>
-            {% endfor %}
-        </select>
-
-        <label for="segment_name">Segment Name:</label>
-        <select id="segment_name" name="segment_name" required disabled>
-            <option value="">Select Segment</option>
-        </select>
-
-        <div class="manual-entry">
-            <h2>Manual Entry Prompts</h2>
-            {% for i in range(1, 11) %}
-                <label for="prompt{{ i }}">Prompt {{ i }}:</label>
-                <input type="text" id="prompt{{ i }}" name="prompt{{ i }}" placeholder="Enter value for prompt {{ i }}" disabled>
-            {% endfor %}
-        </div>
-
-        <button type="submit">Submit</button>
-    </form>
-
+    <h1>Data Entry Form</h1>
+    
+    <!-- Client ID dropdown -->
+    <label for="client_id">Client ID:</label>
+    <select id="client_id" name="client_id">
+        <option value="">Select Client ID</option>
+        {% for client in clients %}
+            <option value="{{ client }}">{{ client }}</option>
+        {% endfor %}
+    </select>
+    
+    <!-- Segment Name dropdown (populated dynamically based on Client ID) -->
+    <label for="segment_name">Segment Name:</label>
+    <select id="segment_name" name="segment_name">
+        <option value="">Select Segment</option>
+    </select>
+    
+    <!-- Additional Fields (Initially Hidden) -->
+    <div id="additional_fields">
+        <h3>Prompts:</h3>
+        {% for i in range(1, 11) %}
+            <label for="prompt{{ i }}">Prompt {{ i }}:</label>
+            <input type="text" id="prompt{{ i }}" name="prompt{{ i }}"><br>
+        {% endfor %}
+        
+        <!-- Fourth input field -->
+        <label for="additional_input">Additional Input:</label>
+        <input type="text" id="additional_input" name="additional_input">
+    </div>
+    
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const clientIdSelect = document.getElementById('client_id');
-            const segmentSelect = document.getElementById('segment_name');
-            const manualEntryDiv = document.querySelector('.manual-entry');
-
-            clientIdSelect.addEventListener('change', function() {
-                const clientId = this.value;
-
-                // Clear previous segments
-                segmentSelect.innerHTML = '<option value="">Select Segment</option>';
-                segmentSelect.disabled = true;
-
-                // Reset manual entry fields
-                resetManualEntryFields();
-
-                if (clientId) {
-                    fetch(`/get_segments/${clientId}`)
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Network response was not ok');
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            data.forEach(segment => {
-                                const option = document.createElement('option');
-                                option.value = segment;
-                                option.textContent = segment;
-                                segmentSelect.appendChild(option);
-                            });
-                            segmentSelect.disabled = false; // Enable the segment dropdown
-                        })
-                        .catch(error => {
-                            console.error('Error fetching segments:', error);
-                        });
-                }
-            });
-
-            segmentSelect.addEventListener('change', function() {
-                // Show manual entry fields only if both fields are selected
-                if (clientIdSelect.value && this.value) {
-                    manualEntryDiv.style.display = 'block'; // Show manual entry fields
-                    enableManualEntryFields(); // Enable manual entry inputs
+        $(document).ready(function() {
+            // Function to check if both fields are filled
+            function checkFields() {
+                const clientIdFilled = $('#client_id').val() !== "";
+                const segmentNameFilled = $('#segment_name').val() !== "";
+                
+                if (clientIdFilled && segmentNameFilled) {
+                    $('#additional_fields').show();
                 } else {
-                    manualEntryDiv.style.display = 'none'; // Hide manual entry fields if any selection is missing
-                    resetManualEntryFields(); // Reset manual entry fields
+                    $('#additional_fields').hide();
                 }
+            }
+
+            // Populate Segment Name dropdown based on Client ID selection
+            $('#client_id').change(function() {
+                const clientId = $(this).val();
+                
+                if (clientId) {
+                    $.post('/get_segments', {client_id: clientId}, function(data) {
+                        const segmentSelect = $('#segment_name');
+                        segmentSelect.empty().append('<option value="">Select Segment</option>');
+                        data.forEach(function(segment) {
+                            segmentSelect.append(`<option value="${segment}">${segment}</option>`);
+                        });
+                    });
+                } else {
+                    $('#segment_name').empty().append('<option value="">Select Segment</option>');
+                }
+                checkFields();  // Check fields after changing Client ID
             });
 
-            function resetManualEntryFields() {
-                for (let i = 1; i <= 10; i++) {
-                    const input = document.getElementById(`prompt${i}`);
-                    if (input) {
-                        input.value = ''; // Clear the input
-                        input.disabled = true; // Disable the input
-                    }
-                }
-            }
-
-            function enableManualEntryFields() {
-                for (let i = 1; i <= 10; i++) {
-                    const input = document.getElementById(`prompt${i}`);
-                    if (input) {
-                        input.disabled = false; // Enable the input
-                    }
-                }
-            }
+            // Check fields when Segment Name changes
+            $('#segment_name').change(function() {
+                checkFields();
+            });
         });
     </script>
 </body>
