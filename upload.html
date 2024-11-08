@@ -32,11 +32,15 @@
     
     <!-- Additional Fields (Initially Hidden) -->
     <div id="additional_fields">
-        <h3>Prompts:</h3>
-        {% for i in range(1, 11) %}
-            <label for="prompt{{ i }}">Prompt {{ i }}:</label>
-            <input type="text" id="prompt{{ i }}" name="prompt{{ i }}"><br>
-        {% endfor %}
+        <h3>Select a Question:</h3>
+        <!-- Dropdown with 10 questions -->
+        <label for="questions">Questions:</label>
+        <select id="questions" name="questions">
+            <option value="">Select a Question</option>
+            {% for i in range(1, 11) %}
+                <option value="Prompt {{ i }}">Prompt {{ i }}</option>
+            {% endfor %}
+        </select><br><br>
         
         <!-- Fourth input field -->
         <label for="additional_input">Additional Input:</label>
