@@ -11,7 +11,7 @@
             padding: 20px;
             background-color: #f9f9f9;
             border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            /* Removed box-shadow for no backdrop effect */
             font-family: Times, serif;
         }
 
@@ -25,7 +25,7 @@
         .form-row {
             display: flex;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 10px; /* Reduced bottom margin */
             flex-wrap: wrap;
         }
 
@@ -48,6 +48,21 @@
             border-radius: 4px;
             box-sizing: border-box;
             font-family: Times, serif;
+        }
+
+        /* Align radio buttons with input fields */
+        .radio-group {
+            display: flex;
+            align-items: center;
+            max-width: 65%;
+            margin-left: 35%; /* Align with input field */
+        }
+
+        .radio-group label {
+            margin-right: 20px; /* Space between radio buttons */
+            font-weight: normal; /* Normal font weight for radio labels */
+            display: flex; /* Ensure label contents align in a row */
+            align-items: center; /* Center align items vertically */
         }
 
         /* Style for the main questions textarea */
@@ -132,12 +147,14 @@
 
             <div class="form-row">
                 <label>Select Service Type:</label>
-                <label>
-                    <input type="radio" name="service_type" value="service" id="service_option"> Service
-                </label>
-                <label>
-                    <input type="radio" name="service_type" value="red_amber" id="red_amber_option"> Red Amber
-                </label>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="service_type" value="service" id="service_option"> Service
+                    </label>
+                    <label>
+                        <input type="radio" name="service_type" value="red_amber" id="red_amber_option"> Red Amber
+                    </label>
+                </div>
             </div>
 
             <div class="form-row" id="segment_name_field" style="display: none;">
@@ -207,8 +224,7 @@ this is my question number 10
             $('input[name="service_type"]').change(function() {
                 if ($('#service_option').is(':checked')) {
                     $('#segment_name_field').show();  // Show Segment Name field
-                    // Optionally, you can reset the segment name
-                    $('#segment_name').val('');
+                    $('#segment_name').val(''); // Reset the segment name
                 } else {
                     $('#segment_name_field').hide();  // Hide Segment Name field if Red Amber is selected
                 }
