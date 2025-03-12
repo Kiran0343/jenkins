@@ -272,6 +272,23 @@ this is my question number 10
                 }
             });
         });
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        fetch('/get_services')
+            .then(response => response.json())
+            .then(data => {
+                const segmentNameField = document.getElementById('segment_name');
+                data.forEach(service => {
+                    const option = document.createElement('option');
+                    option.value = service;
+                    option.textContent = service;
+                    segmentNameField.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error fetching services:', error));
+    });
+</script>
     </script>
 </body>
 </html>
