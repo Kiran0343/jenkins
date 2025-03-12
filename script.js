@@ -200,24 +200,41 @@ this is my question number 10
             function highlightQuestion(lineNumber) {
                 const textarea = document.getElementById('questions');
                 const lines = textarea.value.split('\n');
-                let start = 0;
 
-                // Calculate the start position for the line
-                for (let i = 0; i < lineNumber - 1; i++) {
-                    start += lines[i].length + 1; // Account for newlines
+                // Ensure lineNumber is within bounds
+                if (lineNumber > 0 && lineNumber <= lines.length) {
+                    let start = 0;
+
+                    // Calculate the start position for the line
+                    for (let i = 0; i < lineNumber - 1; i++) {
+                        start += lines[i].length + 1; // Account for newlines
+                    }
+                    const end = start + lines[lineNumber - 1].length;
+
+                    // Highlight the specified line
+                    textarea.focus();
+                    textarea.setSelectionRange(start, end);
+                    textarea.classList.add('highlighted'); // Add highlight class
+
+                    // Clear highlight after a short delay
+                    setTimeout(() => {
+                        textarea.classList.remove('highlighted');
+                    }, 2000); // Remove highlight after 2 seconds
                 }
-                const end = start + lines[lineNumber - 1].length;
-
-                // Highlight the specified line
-                textarea.focus();
-                textarea.setSelectionRange(start, end);
-                textarea.classList.add('highlighted'); // Add highlight class
-
-                // Clear highlight after a short delay
-                setTimeout(() => {
-                    textarea.classList.remove('highlighted');
-                }, 2000); // Remove highlight after 2 seconds
             }
+
+            // Click event on textarea to select question
+            $('#questions').click(function(e) {
+                const textarea = this;
+                const lineHeight = parseInt(window.getComputedStyle(textarea).lineHeight);
+                const y = e.clientY - textarea.getBoundingClientRect().top; // Get Y position within the textarea
+                const lineNumber = Math.floor(y / lineHeight); // Calculate the line number from the Y position
+
+                // Check if the line number is valid
+                if (lineNumber >= 0 && lineNumber < textarea.value.split('\n').length) {
+                    highlightQuestion(lineNumber + 1); // Highlight the selected question (1-based index)
+                }
+            });
 
             // Initialize with the first question highlighted if a client is selected
             $('#client_id').change(function() {
