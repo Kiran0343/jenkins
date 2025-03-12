@@ -83,6 +83,10 @@
         #additional_fields {
             display: none; /* Initially hidden */
         }
+
+        .highlighted {
+            background-color: #d1e7dd; /* Highlight color */
+        }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
@@ -150,12 +154,22 @@ this is my question number 10
 
     <script>
         $(document).ready(function() {
+            $('#client_id').change(function() {
+                // Reset the form fields when the client ID changes
+                $('#segment_name').val(''); // Reset segment name
+                $('#segment_name_field').hide(); // Hide segment name field
+                $('#additional_fields').hide(); // Hide additional fields
+                $('input[name="service_type"]').prop('checked', false); // Reset radio buttons
+                $('#error_message').hide(); // Hide error message
+            });
+
             $('input[name="service_type"]').change(function() {
                 if ($('#service_option').is(':checked')) {
                     $('#segment_name_field').show();  // Show Segment Name field
                 } else {
                     $('#segment_name_field').hide();  // Hide Segment Name field if Red Amber is selected
                     $('#segment_name').val(''); // Reset the segment name
+                    $('#additional_fields').hide(); // Hide additional fields
                 }
             });
 
@@ -163,6 +177,7 @@ this is my question number 10
                 // Show additional fields when a segment is selected
                 if ($(this).val()) {
                     $('#additional_fields').show();
+                    highlightQuestion(1); // Highlight the first question by default
                     $('#error_message').hide();
                 } else {
                     $('#additional_fields').hide();
@@ -179,6 +194,35 @@ this is my question number 10
                     alert("Form submitted successfully!");
                 } else {
                     $('#error_message').show(); // Show error if fields are missing
+                }
+            });
+
+            function highlightQuestion(lineNumber) {
+                const textarea = document.getElementById('questions');
+                const lines = textarea.value.split('\n');
+                let start = 0;
+
+                // Calculate the start position for the line
+                for (let i = 0; i < lineNumber - 1; i++) {
+                    start += lines[i].length + 1; // Account for newlines
+                }
+                const end = start + lines[lineNumber - 1].length;
+
+                // Highlight the specified line
+                textarea.focus();
+                textarea.setSelectionRange(start, end);
+                textarea.classList.add('highlighted'); // Add highlight class
+
+                // Clear highlight after a short delay
+                setTimeout(() => {
+                    textarea.classList.remove('highlighted');
+                }, 2000); // Remove highlight after 2 seconds
+            }
+
+            // Initialize with the first question highlighted if a client is selected
+            $('#client_id').change(function() {
+                if ($(this).val()) {
+                    highlightQuestion(1); // Highlight the first question when a client is selected
                 }
             });
         });
