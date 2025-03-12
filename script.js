@@ -245,6 +245,32 @@ this is my question number 10
                     highlightQuestion(1); // Highlight the first question when a client is selected
                 }
             });
+
+            // Fetch services when the "Service" radio button is selected
+            $('input[name="service_type"]').change(function() {
+                const selectedServiceType = $(this).val();
+
+                // Make AJAX call only if the "Service" type is selected
+                if (selectedServiceType === "service") {
+                    $.ajax({
+                        url: 'http://127.0.0.1:5000/services', // Ensure this matches your Flask server
+                        method: 'GET',
+                        success: function(data) {
+                            $('#service_name').empty(); // Clear previous options
+                            $('#service_name').append('<option value="">Select Service</option>');
+
+                            // Populate the service dropdown
+                            data.forEach(function(service) {
+                                $('#service_name').append(`<option value="${service.id}">${service.name}</option>`);
+                            });
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            console.error('Error fetching services:', textStatus, errorThrown);
+                            alert('Failed to fetch services. Check the console for details.');
+                        }
+                    });
+                }
+            });
         });
     </script>
 </body>
