@@ -118,29 +118,39 @@
 <body>
     <div class="form-container">
         <form action="/submit_request" method="POST" class="form-container">
-        <h1 style="color:#0056b3">CLIENT REPORTING TOOL</h1>
+            <h1 style="color:#0056b3">CLIENT REPORTING TOOL</h1>
 
-        <div class="form-row">
-            <label for="client_id">Client ID:</label>
-            <select id="client_id" name="client_id" required>
-                <option value="">Select Client ID</option>
-                {% for client_id in client_ids %}
-                    <option value="{{ client_id }}">{{ client_id }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="form-row" id="segment_name_field" style="display: none;">
-            <label for="segment_name">Segment Name:</label>
-            <select id="segment_name" name="segment_name" required>
-                <option value="">Select Segment</option>
-            </select>
-        </div>
-
-        <div id="additional_fields" style="display: none;">
             <div class="form-row">
-                <label for="questions">Questions:</label>
-                <textarea id="questions" name="questions" readonly>
+                <label for="client_id">Client ID:</label>
+                <select id="client_id" name="client_id" required>
+                    <option value="">Select Client ID</option>
+                    {% for client_id in client_ids %}
+                        <option value="{{ client_id }}">{{ client_id }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label>Select Service Type:</label>
+                <label>
+                    <input type="radio" name="service_type" value="service" id="service_option"> Service
+                </label>
+                <label>
+                    <input type="radio" name="service_type" value="red_amber" id="red_amber_option"> Red Amber
+                </label>
+            </div>
+
+            <div class="form-row" id="segment_name_field" style="display: none;">
+                <label for="segment_name">Segment Name:</label>
+                <select id="segment_name" name="segment_name" required>
+                    <option value="">Select Segment</option>
+                </select>
+            </div>
+
+            <div id="additional_fields" style="display: none;">
+                <div class="form-row">
+                    <label for="questions">Questions:</label>
+                    <textarea id="questions" name="questions" readonly>
 this is my question number 1
 this is my question number 2
 this is my question number 3
@@ -151,18 +161,18 @@ this is my question number 7
 this is my question number 8
 this is my question number 9
 this is my question number 10
-                </textarea>
+                    </textarea>
+                </div>
+                <input type="hidden" id="selected_line" name="selected_line">
+                <input type="hidden" id="selected_text" name="selected_text">
+                <div class="form-row">
+                    <label for="manual_this-is-my-question-number">Manual Prompt:</label>
+                    <textarea id="manual_this-is-my-question-number" name="manual_Prompt" placeholder="Enter your Prompt"></textarea>
+                </div>
             </div>
-            <input type="hidden" id="selected_line" name="selected_line">
-            <input type="hidden" id="selected_text" name="selected_text">
-            <div class="form-row">
-                <label for="manual_this-is-my-question-number">Manual Prompt:</label>
-                <textarea id="manual_this-is-my-question-number" name="manual_Prompt" placeholder="Enter your Prompt"></textarea>
-            </div>
-        </div>
 
-        <p class="error-message" id="error_message" style="font-size:20px">Please select Client ID and Segment Name.</p>
-        <button type="button" id="submit_button">Submit</button>
+            <p class="error-message" id="error_message" style="font-size:20px">Please select Client ID and Segment Name.</p>
+            <button type="button" id="submit_button">Submit</button>
         </form>
     </div>
 
@@ -186,27 +196,21 @@ this is my question number 10
                 const clientId = $('#client_id').val();
 
                 if (clientId) {
-                    $('#segment_name_field').show();
                     $('#error_message').hide();
-
-                    $.ajax({
-                        url: '/get_segments',
-                        type: 'GET',
-                        data: { client_id: clientId },
-                        success: function(response) {
-                            $('#segment_name').html('<option value="">Select Segment</option>');
-                            response.segments.forEach(function(segment) {
-                                $('#segment_name').append('<option value="' + segment + '">' + segment + '</option>');
-                            });
-                        },
-                        error: function() {
-                            alert('Error fetching segments.');
-                        }
-                    });
                 } else {
                     $('#segment_name_field').hide();
                     $('#additional_fields').hide();
                     $('#error_message').show();
+                }
+            });
+
+            $('input[name="service_type"]').change(function() {
+                if ($('#service_option').is(':checked')) {
+                    $('#segment_name_field').show();  // Show Segment Name field
+                    // Optionally, you can reset the segment name
+                    $('#segment_name').val('');
+                } else {
+                    $('#segment_name_field').hide();  // Hide Segment Name field if Red Amber is selected
                 }
             });
 
@@ -240,21 +244,20 @@ this is my question number 10
             }
 
             // Function to set the default selected line to the first question (line 1)
-    function setDefaultSelectedLine() {
-        const textarea = document.getElementById('questions');
-        const lines = textarea.value.split('\n');
+            function setDefaultSelectedLine() {
+                const textarea = document.getElementById('questions');
+                const lines = textarea.value.split('\n');
 
-        // Set the first line as selected by default
-        const lineNumber = 1;
-        highlightLine(lineNumber);
+                // Set the first line as selected by default
+                const lineNumber = 1;
+                highlightLine(lineNumber);
 
-        // Store the selected line and text in hidden inputs
-        $('#selected_line').val(lineNumber);
-        $('#selected_text').val(lines[lineNumber - 1]); // First line text
-    }
+                // Store the selected line and text in hidden inputs
+                $('#selected_line').val(lineNumber);
+                $('#selected_text').val(lines[lineNumber - 1]); // First line text
+            }
 
-    setDefaultSelectedLine();
-
+            setDefaultSelectedLine();
 
             // Event listener to handle line highlighting when the textarea is clicked
             $('#questions').on('click', function(e) {
@@ -274,8 +277,6 @@ this is my question number 10
                 }
 
                 highlightLine(lineNumber);
-
-
 
                 $('#selected_line').val(lineNumber);
                 $('#selected_text').val(lines[lineNumber - 1]);
