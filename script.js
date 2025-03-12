@@ -166,10 +166,13 @@ this is my question number 10
             $('input[name="service_type"]').change(function() {
                 if ($('#service_option').is(':checked')) {
                     $('#segment_name_field').show();  // Show Segment Name field
+                    $('#questions').val(`this is my question number 1\nthis is my question number 2`); // Set default questions
+                    $('#additional_fields').show(); // Show additional fields
                 } else {
                     $('#segment_name_field').hide();  // Hide Segment Name field if Red Amber is selected
                     $('#segment_name').val(''); // Reset the segment name
-                    $('#additional_fields').hide(); // Hide additional fields
+                    $('#additional_fields').show(); // Show additional fields with only 2 questions
+                    $('#questions').val(`this is my question number 1\nthis is my question number 2`); // Set default questions
                 }
             });
 
