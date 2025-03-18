@@ -1,30 +1,26 @@
-function downloadDoc() {
-    const clientId = "{{ client.id }}";
-    const segmentName = "{{ segment_name.upper() }}";
-    const overallRating = "{{ final_overall_rating.upper() }}";
-    const serviceRating = "{{ service_rating.upper() }}";
-    const question = "{{ question.upper() }}";
-    const results = document.getElementById('results').value;
+from docx import Document
 
-    // Format the content for the .doc file
-    let docContent = `
-CLIENT REPORTING TOOL
+def update_word_document(file_path, replacements):
+    # Load the Word document
+    doc = Document(file_path)
 
-Client Id: ${clientId}
-Service Selected: ${segmentName}
-Question: ${question}
-Overall Rating: ${overallRating}
-Service Rating: ${serviceRating}
+    # Iterate through each paragraph in the document
+    for paragraph in doc.paragraphs:
+        for old_value, new_value in replacements.items():
+            if old_value in paragraph.text:
+                # Replace the old value with the new value
+                paragraph.text = paragraph.text.replace(old_value, new_value)
 
-${results.split("\n").map((line, index) => `${index + 1}. ${line}`).join("\n\n")}
-    `;
+    # Save the updated document
+    updated_file_path = file_path.replace('.docx', '_updated.docx')
+    doc.save(updated_file_path)
+    print(f"Document updated and saved as: {updated_file_path}")
 
-    // Create a Blob from the content
-    const blob = new Blob([docContent.trim()], { type: 'application/msword' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'report.doc';
-    a.click();
-    window.URL.revokeObjectURL(url);
+# Example usage
+file_path = 'example.docx'  # Path to your Word document
+replacements = {
+    'old_value1': 'new_value1',
+    'old_value2': 'new_value2'
 }
+
+update_word_document(file_path, replacements)
