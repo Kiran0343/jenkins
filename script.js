@@ -1,26 +1,23 @@
 from docx import Document
 
-def update_word_document(file_path, replacements):
-    # Load the Word document
-    doc = Document(file_path)
+# Open source document
+source_doc = Document("source.docx")
 
-    # Iterate through each paragraph in the document
-    for paragraph in doc.paragraphs:
-        for old_value, new_value in replacements.items():
-            if old_value in paragraph.text:
-                # Replace the old value with the new value
-                paragraph.text = paragraph.text.replace(old_value, new_value)
+# Create new document
+dest_doc = Document()
 
-    # Save the updated document
-    updated_file_path = file_path.replace('.docx', '_updated.docx')
-    doc.save(updated_file_path)
-    print(f"Document updated and saved as: {updated_file_path}")
+# Copy each paragraph with formatting
+for para in source_doc.paragraphs:
+    # Create new paragraph
+    new_para = dest_doc.add_paragraph()
+    
+    # Copy runs with their formatting
+    for run in para.runs:
+        new_run = new_para.add_run(run.text)
+        new_run.bold = run.bold
+        new_run.italic = run.italic
+        new_run.underline = run.underline
+        # Copy other formatting attributes as needed
 
-# Example usage
-file_path = 'example.docx'  # Path to your Word document
-replacements = {
-    'old_value1': 'new_value1',
-    'old_value2': 'new_value2'
-}
-
-update_word_document(file_path, replacements)
+# Save the new document
+dest_doc.save("destination.docx")
