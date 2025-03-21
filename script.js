@@ -7,12 +7,20 @@ from docx.oxml import OxmlElement
 # Create a new document
 doc = Document()
 
-# Add a green horizontal line at the top
+# Add a green horizontal line at the top (without needing an image)
 paragraph = doc.add_paragraph()
-run = paragraph.add_run()
-run.add_picture('green_line.jpg', width=Inches(6))  # You'll need to create this image
+p = paragraph._p
+pPr = p.get_or_add_pPr()
+pBdr = OxmlElement('w:pBdr')
+bottom = OxmlElement('w:bottom')
+bottom.set(qn('w:val'), 'single')
+bottom.set(qn('w:sz'), '24')  # 24 eighths of a point = 3 points
+bottom.set(qn('w:space'), '0')
+bottom.set(qn('w:color'), '00B050')  # Green color
+pBdr.append(bottom)
+pPr.append(pBdr)
 
-# Add some space
+# Add space after the line
 doc.add_paragraph()
 
 # Create the dark blue header box
@@ -45,6 +53,19 @@ question_run.font.size = Pt(12)
 box_paragraph = doc.add_paragraph()
 box_run = box_paragraph.add_run("DO NOT HAVE ENOUGH INFORMATION TO ANSWER THE QUESTION")
 box_run.font.size = Pt(12)
+
+# Add border to the box paragraph
+p = box_paragraph._p
+pPr = p.get_or_add_pPr()
+pBdr = OxmlElement('w:pBdr')
+for side in ['top', 'left', 'bottom', 'right']:
+    border = OxmlElement(f'w:{side}')
+    border.set(qn('w:val'), 'single')
+    border.set(qn('w:sz'), '4')
+    border.set(qn('w:space'), '0')
+    border.set(qn('w:color'), 'auto')
+    pBdr.append(border)
+pPr.append(pBdr)
 
 # Save the document
 doc.save('client_report.docx')
