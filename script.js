@@ -1,71 +1,57 @@
 from docx import Document
-from docx.shared import Pt, Inches, RGBColor
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.oxml.ns import qn
-from docx.oxml import OxmlElement
+from docx.shared import Pt, Inches
+from docx.enum.style import WD_STYLE_TYPE
+from docx.enum.table import WD_TABLE_ALIGNMENT
 
-# Create a new document
-doc = Document()
+def create_client_feedback_document():
+    document = Document()
+    
+    # Define styles (as before)
+    # ...
 
-# Add a green horizontal line at the top (without needing an image)
-paragraph = doc.add_paragraph()
-p = paragraph._p
-pPr = p.get_or_add_pPr()
-pBdr = OxmlElement('w:pBdr')
-bottom = OxmlElement('w:bottom')
-bottom.set(qn('w:val'), 'single')
-bottom.set(qn('w:sz'), '24')  # 24 eighths of a point = 3 points
-bottom.set(qn('w:space'), '0')
-bottom.set(qn('w:color'), '00B050')  # Green color
-pBdr.append(bottom)
-pPr.append(pBdr)
+    # Function to create a box (table with borders)
+    def add_box(content, style='Normal Text'):
+        table = document.add_table(rows=1, cols=1)
+        table.alignment = WD_TABLE_ALIGNMENT.CENTER
+        cell = table.cell(0, 0)
+        cell.width = Inches(6)
+        for paragraph in content:
+            p = cell.add_paragraph(paragraph, style=style)
+        # Add borders to the table
+        for row in table.rows:
+            for cell in row.cells:
+                cell.width = Inches(6)
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = Pt(11)
+        for cell in table.rows[0].cells:
+            cell.width = Inches(6)
+        document.add_paragraph()  # Add some space after the box
 
-# Add space after the line
-doc.add_paragraph()
+    # Title box
+    add_box(['Leveraging LLM models to summarize CLIENT 46 client feedback as captured in CX360'], 'Title')
 
-# Create the dark blue header box
-header_paragraph = doc.add_paragraph()
-header_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
-header_run = header_paragraph.add_run("CLIENT REPORTING TOOL")
-header_run.font.size = Pt(16)
-header_run.font.name = "Arial"
-header_run.font.bold = True
-header_run.font.color.rgb = RGBColor(255, 255, 255)  # White text
+    # LLM prompt parameters box
+    add_box([
+        'LLM prompt parameters:',
+        'Source : CX360 dataset (do we need more explanation about the source data)',
+        'Data time window – 15 months',
+        'PXO Client Id : 46(CLIENT 46)',
+        'Field used : ONLY comments field',
+        'LLM model : gpt-4-32k'
+    ], 'Normal Text')
 
-# Set paragraph background to dark blue
-shading_elm = OxmlElement('w:shd')
-shading_elm.set(qn('w:fill'), "2B3A4D")  # Dark blue color
-header_paragraph._p.get_or_add_pPr().append(shading_elm)
+    # CLIENT REPORTING TOOL box
+    add_box([
+        'CLIENT REPORTING TOOL',
+        'Client Id : 46    Service Selected : RED & AMBER SERVICES',
+        'Question : TOP 5 POSITIVE POINTS    Overall Rating : AMBER',
+        'DO NOT HAVE ENOUGH INFORMATION TO ANSWER THE QUESTION'
+    ], 'Normal Text')
 
-# Add client information section
-info_paragraph = doc.add_paragraph()
-client_run = info_paragraph.add_run("Client Id : 46     Service Selected : RED & AMBER SERVICES")
-client_run.font.bold = True
-client_run.font.size = Pt(12)
+    # Save the document
+    document.save('client_feedback_summary.docx')
 
-# Add question and rating section
-question_paragraph = doc.add_paragraph()
-question_run = question_paragraph.add_run("Question : TOP 5 POSITIVE POINTS     Overall Rating : AMBER")
-question_run.font.bold = True
-question_run.font.size = Pt(12)
-
-# Add the large box with the "not enough information" message
-box_paragraph = doc.add_paragraph()
-box_run = box_paragraph.add_run("DO NOT HAVE ENOUGH INFORMATION TO ANSWER THE QUESTION")
-box_run.font.size = Pt(12)
-
-# Add border to the box paragraph
-p = box_paragraph._p
-pPr = p.get_or_add_pPr()
-pBdr = OxmlElement('w:pBdr')
-for side in ['top', 'left', 'bottom', 'right']:
-    border = OxmlElement(f'w:{side}')
-    border.set(qn('w:val'), 'single')
-    border.set(qn('w:sz'), '4')
-    border.set(qn('w:space'), '0')
-    border.set(qn('w:color'), 'auto')
-    pBdr.append(border)
-pPr.append(pBdr)
-
-# Save the document
-doc.save('client_report.docx')
+if __name__ == "__main__":
+    create_client_feedback_document()
+    print("Word document 'client_feedback_summary.docx' created successfully with proper styling and boxes.")
